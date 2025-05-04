@@ -36,6 +36,9 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(64))
     contact_info = db.Column(db.String(120))
     
+    # Новое поле для фото профиля:
+    profile_picture = db.Column(db.String(140), default='default_profile.jpg')
+
     # Отношения:
     # Один студент может иметь множество записей на курсы
     registrations = db.relationship('Registration', backref='student', lazy='dynamic')
@@ -67,6 +70,7 @@ class User(UserMixin, db.Model):
         except Exception:
             return None
         return User.query.get(user_id)
+
 
 
 

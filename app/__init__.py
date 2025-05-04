@@ -24,7 +24,7 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 def create_app(config_object='config.Config'):
-    app = Flask(__name__)  # Если шаблоны находятся в ../templates
+    app = Flask(__name__)
     app.config.from_object(config_object)
 
     # Инициализация расширений

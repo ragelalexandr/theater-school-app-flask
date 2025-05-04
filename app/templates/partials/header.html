@@ -1,0 +1,55 @@
+<!-- File: partials/header.html -->
+<!-- Path: template/partials/header.html -->
+
+<!-- Header Partial: сюда можно добавить логотип и заголовок -->
+
+<!-- File: partials/header.html -->
+<!-- Path: template/partials/header.html -->
+
+<header>
+    <div class="container">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/android-chrome-192x192.png') }}" alt="Логотип">
+        </div>
+        <h1 class="title">Театральная школа</h1>
+        <div class="auth">
+            <a href="{{ url_for('student.login') }}" class="login-btn">Вход</a>
+        </div>
+    </div>
+</header>
+
+<style>
+    header {
+        background-color: #f8f9fa;
+        padding: 15px;
+        text-align: center;
+        border-bottom: 2px solid #ddd;
+    }
+    .container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .logo img {
+        height: 50px;
+        margin-right: 10px;
+    }
+    .title {
+        font-size: 24px;
+        font-weight: bold;
+    }
+    .auth {
+        margin-left: auto;
+    }
+    .login-btn {
+        padding: 8px 15px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+    .login-btn:hover {
+        background-color: #0056b3;
+    }
+</style>

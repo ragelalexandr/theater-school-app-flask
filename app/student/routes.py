@@ -17,6 +17,9 @@ from app.forms import (
 from app.email import send_reset_email  # Предполагается, что функция для отправки письма реализована
 from app.student import bp  # импортировать blueprint
 from app.decorators import roles_required
+from app.utils import save_picture
+
+
 
 # Реализация декоратора для проверки ролей
 @bp.route('/dashboard', endpoint='dashboard')
@@ -36,11 +39,18 @@ def register():
     if form.validate_on_submit():
         user = User(email=form.email.data, role='student')
         user.set_password(form.password.data)
+        user.name = form.name.data  # Добавляем имя, если поле есть
         db.session.add(user)
         db.session.commit()
         flash('Регистрация успешна. Теперь вы можете войти в систему.', 'success')
         return redirect(url_for('student.login'))
+    else:
+        if form.errors:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    flash(f"Ошибка в поле {field}: {error}", "danger")
     return render_template('student/register.html', title='Регистрация', form=form)
+
 
 # ---------------------- Авторизация ----------------------
 @bp.route('/login', methods=['GET', 'POST'])
@@ -100,29 +110,45 @@ def reset_password(token):
     return render_template('student/reset_password.html', title='Сброс пароля', form=form)
 
 # ---------------------- Настройки профиля ----------------------
+import os  # Добавляем импорт, если его ещё нет в этом модуле
+
 @bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     form = UpdateProfileForm()
+    
     if form.validate_on_submit():
+        # Обновляем текстовые поля профиля
         current_user.name = form.name.data
         current_user.contact_info = form.contact_info.data
         
-        # Обработка загрузки файла с фотографией
+        # Если пользователь выбрал файл с фотографией, обрабатываем загрузку
         if form.picture.data:
-            filename = secure_filename(form.picture.data.filename)
-            picture_path = current_app.root_path + '/static/profile_pics/' + filename
-            form.picture.data.save(picture_path)
-            # Пример: сохраняем путь в дополнительное поле profile_image (добавьте его в модель User, если требуется)
-            current_user.profile_image = 'profile_pics/' + filename
+            picture_file = save_picture(form.picture.data)
+            # Обновляем поле profile_picture, которое определено в модели User
+            current_user.profile_picture = picture_file
         
+        # Сохраняем изменения в базе данных
         db.session.commit()
-        flash('Ваш профиль обновлен.', 'success')
+        flash('Ваш профиль обновлён!', 'success')
         return redirect(url_for('student.profile'))
+    
+    # Предзаполнение формы текущими данными пользователя
     elif request.method == 'GET':
         form.name.data = current_user.name
         form.contact_info.data = current_user.contact_info
-    return render_template('student/profile.html', title='Профиль', form=form)
+
+    # Получаем значение сохранённого файла или используем изображение по умолчанию
+    profile_pic = current_user.profile_picture or 'default_profile.jpg'
+    # Формируем полный путь к файлу на диске
+    file_path = os.path.join(current_app.root_path, 'static', 'profile_pics', profile_pic)
+    # Если файл не найден, используем изображение по умолчанию
+    if not os.path.exists(file_path):
+        profile_pic = 'default_profile.jpg'
+    
+    image_file = url_for('static', filename='profile_pics/' + profile_pic)
+    
+    return render_template('student/profile.html', title='Профиль', form=form, image_file=image_file)
 
 # Смена пароля
 @bp.route('/change_password', methods=['GET', 'POST'])

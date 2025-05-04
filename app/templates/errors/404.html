@@ -1,49 +1,8 @@
-<!-- File: 404.html
-Path: /my_flask_app/templates/errors/404.html -->
+<!-- File: errors/404.html -->
+<!-- Path: template/errors/404.html -->
 
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Ошибка 404 - Страница не найдена</title>
-    <!-- Подключите ваш CSS, если он используется -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: Arial, sans-serif;
-            color: #333;
-            text-align: center;
-            padding: 50px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        h1 {
-            font-size: 3em;
-            margin-bottom: 0.5em;
-        }
-        p {
-            font-size: 1.2em;
-        }
-        a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Ошибка 404</h1>
-        <p>Страница, которую вы ищете, не найдена.</p>
-        <p>Возможно, адрес введён неправильно или страница была удалена.</p>
-        <p>
-            Вернуться на <a href="{{ url_for('student.dashboard') }}">главную страницу</a>.
-        </p>
-    </div>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Ошибка 404. Страница не найдена.</h1>
+  <p>Проверьте правильность адреса или вернитесь на <a href="{{ url_for('student.dashboard') }}">главную страницу</a>.</p>
+{% endblock %}

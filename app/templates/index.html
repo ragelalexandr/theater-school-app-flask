@@ -1,0 +1,24 @@
+<!-- File: index.html -->
+<!-- Path: app/templates/index.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="jumbotron bg-light p-5 rounded">
+    <h1 class="display-4">Добро пожаловать в Theater School App!</h1>
+    <p class="lead">
+      Это ваша платформа для управления театральной школой – студенты, преподаватели, администраторы.
+    </p>
+    <hr class="my-4">
+    <p>
+      Используйте навигационное меню для доступа к различным разделам приложения.
+    </p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('student.dashboard') }}" role="button">
+      Перейти в панель студента
+    </a>
+  </div>
+</div>
+{% endblock %}

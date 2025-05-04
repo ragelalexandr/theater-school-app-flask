@@ -7,9 +7,12 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, FileField, TextAreaField, SelectField, DateField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
 from app.models import User
+from flask_wtf.file import FileField, FileAllowed
+from wtforms.validators import Length
 
 
 class RegistrationForm(FlaskForm):
+    name = StringField('Имя', validators=[DataRequired(), Length(max=64)])
     email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
     password = PasswordField('Пароль', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Подтвердите пароль', validators=[
@@ -44,11 +47,15 @@ class ResetPasswordForm(FlaskForm):
     ])
     submit = SubmitField('Сбросить пароль')
 
+
 class UpdateProfileForm(FlaskForm):
     name = StringField('Имя', validators=[Length(max=64)])
     contact_info = StringField('Контактная информация', validators=[Length(max=120)])
+    # Если хотите ограничить тип файлов, можно добавить FileAllowed, например:
+    # picture = FileField('Загрузить фотографию профиля', validators=[FileAllowed(['jpg', 'jpeg', 'png'])])
     picture = FileField('Загрузить фотографию профиля')
     submit = SubmitField('Сохранить изменения')
+
 
 class ChangePasswordForm(FlaskForm):
     current_password = PasswordField('Текущий пароль', validators=[DataRequired()])
