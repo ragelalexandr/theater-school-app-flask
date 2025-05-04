@@ -2,6 +2,8 @@
 # Path: my_flask_app/app/admin/routes.py
 
 # Маршруты (управление данными о представлениях, курсах, преподавателях, студентах; модерация отзывов)
+# File: routes.py
+# Path: my_flask_app/app/admin/routes.py
 
 from functools import wraps
 from app.forms import ResetPasswordForm
@@ -28,14 +30,6 @@ def reset_password(token):
         flash('Ваш пароль обновлен. Теперь вы можете войти.', 'success')
         return redirect(url_for('student.login'))
     return render_template('student/reset_password.html', title='Сброс пароля', form=form)
-
-# Реализация декоратора для проверки ролей
-@bp.route('/dashboard')
-@login_required
-@roles_required('admin')
-def dashboard():
-    return render_template('admin/dashboard.html', title='Административная панель')
-
 
 # Декоратор для проверки, что текущий пользователь – администратор
 def admin_required(f):
@@ -125,125 +119,4 @@ def add_course():
                             start_datetime=start_datetime, end_datetime=end_datetime, available=available)
         db.session.add(new_course)
         db.session.commit()
-        flash('Курс добавлен.', 'success')
-        return redirect(url_for('admin.courses'))
-    teachers = User.query.filter_by(role='teacher').all()
-    return render_template('admin/add_course.html', teachers=teachers, title='Добавить курс')
-
-@bp.route('/courses/edit/<int:course_id>', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def edit_course(course_id):
-    course = Course.query.get_or_404(course_id)
-    if request.method == 'POST':
-        course.title = request.form.get('title')
-        course.teacher_id = request.form.get('teacher_id')
-        course.start_datetime = request.form.get('start_datetime')
-        course.end_datetime = request.form.get('end_datetime')
-        course.available = request.form.get('available') == 'true'
-        db.session.commit()
-        flash('Данные курса обновлены.', 'success')
-        return redirect(url_for('admin.courses'))
-    teachers = User.query.filter_by(role='teacher').all()
-    return render_template('admin/edit_course.html', course=course, teachers=teachers, title='Редактировать курс')
-
-@bp.route('/courses/delete/<int:course_id>', methods=['POST'])
-@login_required
-@admin_required
-def delete_course(course_id):
-    course = Course.query.get_or_404(course_id)
-    db.session.delete(course)
-    db.session.commit()
-    flash('Курс удален.', 'info')
-    return redirect(url_for('admin.courses'))
-
-# ---- Преподаватели ----
-@bp.route('/teachers')
-@login_required
-@admin_required
-def teachers():
-    teachers = User.query.filter_by(role='teacher').all()
-    return render_template('admin/teachers.html', teachers=teachers, title='Преподаватели')
-
-@bp.route('/teachers/edit/<int:teacher_id>', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def edit_teacher(teacher_id):
-    teacher = User.query.get_or_404(teacher_id)
-    if teacher.role != 'teacher':
-        flash('Это не преподаватель.', 'danger')
-        return redirect(url_for('admin.teachers'))
-    if request.method == 'POST':
-        teacher.name = request.form.get('name')
-        # Можно добавить обновление дополнительных полей (например, специализации)
-        db.session.commit()
-        flash('Данные преподавателя обновлены.', 'success')
-        return redirect(url_for('admin.teachers'))
-    return render_template('admin/edit_teacher.html', teacher=teacher, title='Редактировать преподавателя')
-
-# ---- Студенты ----
-@bp.route('/students')
-@login_required
-@admin_required
-def students():
-    students = User.query.filter_by(role='student').all()
-    return render_template('admin/students.html', students=students, title='Студенты')
-
-@bp.route('/students/edit/<int:student_id>', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def edit_student(student_id):
-    student = User.query.get_or_404(student_id)
-    if student.role != 'student':
-        flash('Это не студент.', 'danger')
-        return redirect(url_for('admin.students'))
-    if request.method == 'POST':
-        student.name = request.form.get('name')
-        student.contact_info = request.form.get('contact_info')
-        db.session.commit()
-        flash('Данные студента обновлены.', 'success')
-        return redirect(url_for('admin.students'))
-    return render_template('admin/edit_student.html', student=student, title='Редактировать студента')
-
-# ================== 6.3. Модерация отзывов ==================
-
-@bp.route('/reviews')
-@login_required
-@admin_required
-def reviews():
-    all_reviews = Review.query.order_by(Review.created_at.desc()).all()
-    return render_template('admin/reviews.html', reviews=all_reviews, title='Модерация отзывов')
-
-@bp.route('/reviews/approve/<int:review_id>', methods=['POST'])
-@login_required
-@admin_required
-def approve_review(review_id):
-    review = Review.query.get_or_404(review_id)
-    review.moderated = True
-    db.session.commit()
-    flash('Отзыв опубликован.', 'success')
-    return redirect(url_for('admin.reviews'))
-
-@bp.route('/reviews/edit/<int:review_id>', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def edit_review(review_id):
-    review = Review.query.get_or_404(review_id)
-    if request.method == 'POST':
-        review.content = request.form.get('content')
-        # При необходимости можно обновить и рейтинг
-        review.rating = request.form.get('rating')
-        db.session.commit()
-        flash('Отзыв обновлен.', 'success')
-        return redirect(url_for('admin.reviews'))
-    return render_template('admin/edit_review.html', review=review, title='Редактировать отзыв')
-
-@bp.route('/reviews/delete/<int:review_id>', methods=['POST'])
-@login_required
-@admin_required
-def delete_review(review_id):
-    review = Review.query.get_or_404(review_id)
-    db.session.delete(review)
-    db.session.commit()
-    flash('Отзыв удалён.', 'info')
-    return redirect(url_for('admin.reviews'))
+        flash

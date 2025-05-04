@@ -56,25 +56,41 @@ def register():
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('student.profile'))
+        # Перенаправляем по ролям:
+        if current_user.role == 'admin':
+            return redirect(url_for('admin.dashboard'))
+        elif current_user.role == 'teacher':
+            return redirect(url_for('teacher.dashboard'))
+        else:
+            return redirect(url_for('student.dashboard'))
+
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
+        # Если пользователь найден и его пароль корректный
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')
             flash('Вход выполнен успешно.', 'success')
-            return redirect(next_page) if next_page else redirect(url_for('student.profile'))
+            # Перенаправляем по ролям после входа
+            if user.role == 'admin':
+                return redirect(next_page) if next_page else redirect(url_for('admin.dashboard'))
+            elif user.role == 'teacher':
+                return redirect(next_page) if next_page else redirect(url_for('teacher.dashboard'))
+            else:
+                return redirect(next_page) if next_page else redirect(url_for('student.dashboard'))
         else:
             flash('Неверный email или пароль.', 'danger')
     return render_template('student/login.html', title='Вход', form=form)
+
+
 
 # Выход из системы
 @bp.route('/logout')
 def logout():
     logout_user()
     flash('Вы вышли из системы.', 'info')
-    return redirect(url_for('student.login'))
+    return redirect(url_for('index'))
 
 # ---------------------- Восстановление пароля ----------------------
 

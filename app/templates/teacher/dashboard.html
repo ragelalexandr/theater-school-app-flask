@@ -2,3 +2,91 @@
 <!-- Path: template/teacher/dashboard.html -->
 
 <!-- Teacher Dashboard Page: панель преподавателя -->
+
+{% extends "base.html" %}
+
+{% block title %}Панель преподавателя{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h1 class="mb-4 text-center">Панель преподавателя</h1>
+  
+  <!-- Раздел 1: Список курсов и студентов -->
+  <div class="mb-5">
+    <h3>Список курсов и студентов</h3>
+    <p>Информация о ваших курсах и записанных студентах.</p>
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Название курса</th>
+            <th>Студент</th>
+            <th>Тип прохождения</th>
+            <th>Дата записи</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Пример строки – заменить динамическими данными -->
+          <tr>
+            <td>Актерское мастерство</td>
+            <td>Иван Петров</td>
+            <td>Персональное</td>
+            <td>10.07.2025</td>
+          </tr>
+          <tr>
+            <td>Импровизация</td>
+            <td>Мария Иванова</td>
+            <td>Групповое</td>
+            <td>12.07.2025</td>
+          </tr>
+          <!-- Дополнительные строки -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Раздел 2: Управление записями студентов -->
+  <div class="mb-5">
+    <h3>Управление записями студентов</h3>
+    <p>Просмотрите заявки на курсы и подтвердите или отклоните их.</p>
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Имя студента</th>
+            <th>Курс</th>
+            <th>Тип прохождения</th>
+            <th>Дата записи</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Пример строки – заменить динамическими данными -->
+          <tr>
+            <td>Александр Смирнов</td>
+            <td>Актерское мастерство</td>
+            <td>Персональное</td>
+            <td>15.07.2025</td>
+            <td>
+              <a href="#" class="btn btn-sm btn-success">Подтвердить</a>
+              <a href="#" class="btn btn-sm btn-danger">Отклонить</a>
+            </td>
+          </tr>
+          <tr>
+            <td>Екатерина Новикова</td>
+            <td>Импровизация</td>
+            <td>Групповое</td>
+            <td>16.07.2025</td>
+            <td>
+              <a href="#" class="btn btn-sm btn-success">Подтвердить</a>
+              <a href="#" class="btn btn-sm btn-danger">Отклонить</a>
+            </td>
+          </tr>
+          <!-- Дополнительные строки -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+</div>
+{% endblock %}
