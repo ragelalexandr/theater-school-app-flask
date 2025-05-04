@@ -13,6 +13,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from app import db, login_manager
 
+# File: models.py
+# Path: /my_flask_app/app/models.py
+
 # Функция загрузки пользователя для Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
@@ -24,7 +27,7 @@ def load_user(user_id):
 # Дополнительное поле role используется для разграничения прав доступа.
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, index=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
