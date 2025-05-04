@@ -2,3 +2,36 @@
 <!-- Path: template/partials/navbar.html -->
 
 <!-- Navbar Partial: здесь должно быть навигационное меню -->
+
+<nav class="navbar navbar-expand-lg navbar-dark shadow" style="background: linear-gradient(135deg, #4b6cb7, #182848);">
+  <div class="container">
+    <!-- Логотип и название сайта -->
+    <a class="navbar-brand" href="{{ url_for('student.dashboard') }}">
+      <img src="{{ url_for('static', filename='images/android-chrome-192x192.png') }}"
+           alt="Логотип" width="40" height="40" class="d-inline-block align-text-top me-2">
+      Театральная школа
+    </a>
+    <!-- Кнопка переключения для мобильных устройств -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <!-- Навигационное меню -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        {% if current_user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('student.profile') }}">Профиль</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('student.logout') }}">Выход</a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('student.login') }}">Вход</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
