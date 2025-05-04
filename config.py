@@ -1,10 +1,8 @@
 # File: config.py
-# Path: /my_flask_app/config.py
-
-import os
+# Path: theater-school-app-flask/app/config.py
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-secret-key'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or "sqlite:///site.db"
+    SECRET_KEY = 'your-secret-key'  # обязательно измените на надежный секретный ключ
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///your-database.db'  # настройте строку подключения к БД
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    # Добавьте другие переменные конфигурации по необходимости
+    # Добавьте другие переменные конфигурации, если требуется

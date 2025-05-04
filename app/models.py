@@ -7,11 +7,12 @@
 # Path: /my_flask_app/app/models.py
 
 from datetime import datetime, date
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import URLSafeTimedSerializer as Serializer
 from flask import current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from app import db, login_manager
+from . import db, login_manager
+
 
 # File: models.py
 # Path: /my_flask_app/app/models.py
@@ -53,22 +54,20 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def get_reset_token(self, expires_sec=1800):
-        """Генерирует токен для восстановления пароля (действителен expires_sec секунд)."""
-        s = Serializer(current_app.config['SECRET_KEY'], expires_in=expires_sec)
-        return s.dumps({'user_id': self.id}).decode('utf-8')
+        s = Serializer(current_app.config['SECRET_KEY'])
+        # s.dumps() возвращает строку, если используем Python 3
+        return s.dumps({'user_id': self.id})
 
     @staticmethod
-    def verify_reset_token(token):
-        """Проверяет токен восстановления пароля и возвращает пользователя, если токен корректный."""
+    def verify_reset_token(token, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
-            user_id = s.loads(token)['user_id']
+            data = s.loads(token, max_age=expires_sec)
+            user_id = data['user_id']
         except Exception:
             return None
         return User.query.get(user_id)
-    
-    def __repr__(self):
-        return f'<User {self.email}>'
+
 
 
 # =====================================================================

@@ -18,8 +18,6 @@ from app.email import send_reset_email  # Предполагается, что �
 from app.student import bp  # импортировать blueprint
 from app.decorators import roles_required
 
-
-
 # Реализация декоратора для проверки ролей
 @bp.route('/dashboard')
 @login_required
