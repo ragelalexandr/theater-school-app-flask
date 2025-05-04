@@ -19,11 +19,12 @@ from app.student import bp  # импортировать blueprint
 from app.decorators import roles_required
 
 # Реализация декоратора для проверки ролей
-@bp.route('/dashboard')
+@bp.route('/dashboard', endpoint='dashboard')
 @login_required
 @roles_required('student')
 def student_dashboard():
     return render_template('student/dashboard.html', title='Панель студента')
+
 
 
 # ---------------------- Регистрация ----------------------
