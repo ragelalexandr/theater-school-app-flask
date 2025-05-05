@@ -1,0 +1,28 @@
+{# File: app/templates/admin/add_theatre_show.html #}
+{% extends "base.html" %}
+
+{% block title %}Добавить представление{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>Добавить театральное представление</h1>
+  <form method="POST">
+    <!-- Название представления -->
+    <div class="mb-3">
+      <label for="title" class="form-label">Название</label>
+      <input type="text" class="form-control" id="title" name="title" required>
+    </div>
+    <!-- Дата представления -->
+    <div class="mb-3">
+      <label for="show_date" class="form-label">Дата представления</label>
+      <input type="datetime-local" class="form-control" id="show_date" name="show_date" required>
+    </div>
+    <!-- Описание представления -->
+    <div class="mb-3">
+      <label for="description" class="form-label">Описание</label>
+      <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Добавить</button>
+  </form>
+</div>
+{% endblock %}

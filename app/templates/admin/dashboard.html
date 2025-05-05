@@ -1,8 +1,4 @@
-<!-- File: admin/dashboard.html -->
-<!-- Path: template/admin/dashboard.html -->
-
-<!-- Admin Dashboard Page: панель администратора -->
-
+{# File: templates/admin/dashboard.html #}
 {% extends "base.html" %}
 
 {% block title %}Панель администратора{% endblock %}
@@ -51,7 +47,7 @@
     <div class="tab-pane fade show active" id="shows" role="tabpanel" aria-labelledby="shows-tab">
       <h3 class="mt-3">Театральные представления</h3>
       <p>Добавляйте, редактируйте и удаляйте данные о театральных представлениях.</p>
-      <a href="#" class="btn btn-primary mb-3">Добавить представление</a>
+      <a href="{{ url_for('admin.add_theatre_show') }}" class="btn btn-primary mb-3">Добавить представление</a>
       <div class="table-responsive">
         <table class="table table-bordered table-hover">
           <thead>
@@ -63,17 +59,27 @@
             </tr>
           </thead>
           <tbody>
-            <!-- Пример строки – заменить динамическими данными -->
+            {% for show in shows %}
             <tr>
-              <td>Великолепие сцен</td>
-              <td>20.07.2025</td>
-              <td>Представление, посвящённое классическим пьесам</td>
+              <td>{{ show.title }}</td>
+              <td>{{ show.show_date.strftime('%d.%m.%Y') if show.show_date else 'Нет данных' }}</td>
+              <td>{{ show.description }}</td>
               <td>
-                <a href="#" class="btn btn-sm btn-outline-primary">Редактировать</a>
-                <a href="#" class="btn btn-sm btn-outline-danger">Удалить</a>
+                <a href="{{ url_for('admin.edit_theatre_show', show_id=show.id) }}" class="btn btn-sm btn-outline-primary">Редактировать</a>
+                <form action="{{ url_for('admin.delete_theatre_show', show_id=show.id) }}" method="POST" style="display: inline;">
+                  <button type="submit" class="btn btn-sm btn-outline-danger"
+                          onclick="return confirm('Вы уверены, что хотите удалить представление?');">
+                    Удалить
+                  </button>
+                </form>
+                
               </td>
             </tr>
-            <!-- Дополнительные строки -->
+            {% else %}
+            <tr>
+              <td colspan="4" class="text-center">Нет представлений</td>
+            </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>
@@ -83,7 +89,7 @@
     <div class="tab-pane fade" id="courses" role="tabpanel" aria-labelledby="courses-tab">
       <h3 class="mt-3">Курсы</h3>
       <p>Добавляйте, редактируйте и удаляйте данные о курсах.</p>
-      <a href="#" class="btn btn-primary mb-3">Добавить курс</a>
+      <a href="{{ url_for('admin.add_course') }}" class="btn btn-primary mb-3">Добавить курс</a>
       <div class="table-responsive">
         <table class="table table-bordered table-hover">
           <thead>
@@ -95,16 +101,24 @@
             </tr>
           </thead>
           <tbody>
+            {% for course in courses %}
             <tr>
-              <td>Основы актерского мастерства</td>
-              <td>Иван Иванов</td>
-              <td>Пн, Ср, Пт 18:00–20:00</td>
+              <td>{{ course.title }}</td>
+              <td>{{ course.teacher.name if course.teacher else 'Нет данных' }}</td>
               <td>
-                <a href="#" class="btn btn-sm btn-outline-primary">Редактировать</a>
-                <a href="#" class="btn btn-sm btn-outline-danger">Удалить</a>
+                {{ course.start_datetime.strftime('%d.%m.%Y %H:%M') }} – 
+                {{ course.end_datetime.strftime('%d.%m.%Y %H:%M') }}
+              </td>
+              <td>
+                <a href="{{ url_for('admin.edit_course', course_id=course.id) }}" class="btn btn-sm btn-outline-primary">Редактировать</a>
+                <a href="{{ url_for('admin.delete_course', course_id=course.id) }}" class="btn btn-sm btn-outline-danger">Удалить</a>
               </td>
             </tr>
-            <!-- Дополнительные строки -->
+            {% else %}
+            <tr>
+              <td colspan="4" class="text-center">Нет курсов</td>
+            </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>
@@ -114,26 +128,31 @@
     <div class="tab-pane fade" id="teachers" role="tabpanel" aria-labelledby="teachers-tab">
       <h3 class="mt-3">Преподаватели</h3>
       <p>Добавляйте, редактируйте и удаляйте информацию о преподавателях.</p>
-      <a href="#" class="btn btn-primary mb-3">Добавить преподавателя</a>
+      <a href="{{ url_for('admin.add_teacher') }}" class="btn btn-primary mb-3">Добавить преподавателя</a>
       <div class="table-responsive">
         <table class="table table-bordered table-hover">
           <thead>
             <tr>
               <th>Имя</th>
-              <th>Специализация</th>
+              <th>Контактная информация</th>
               <th>Действия</th>
             </tr>
           </thead>
           <tbody>
+            {% for teacher in teachers %}
             <tr>
-              <td>Иван Иванов</td>
-              <td>Актерское мастерство</td>
+              <td>{{ teacher.name }}</td>
+              <td>{{ teacher.contact_info }}</td>
               <td>
-                <a href="#" class="btn btn-sm btn-outline-primary">Редактировать</a>
-                <a href="#" class="btn btn-sm btn-outline-danger">Удалить</a>
+                <a href="{{ url_for('admin.edit_teacher', teacher_id=teacher.id) }}" class="btn btn-sm btn-outline-primary">Редактировать</a>
+                <a href="{{ url_for('admin.delete_teacher', teacher_id=teacher.id) }}" class="btn btn-sm btn-outline-danger">Удалить</a>
               </td>
             </tr>
-            <!-- Дополнительные строки -->
+            {% else %}
+            <tr>
+              <td colspan="3" class="text-center">Нет преподавателей</td>
+            </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>
@@ -143,7 +162,7 @@
     <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab">
       <h3 class="mt-3">Студенты</h3>
       <p>Просматривайте и редактируйте профильные данные студентов.</p>
-      <a href="#" class="btn btn-primary mb-3">Добавить студента</a>
+      <a href="{{ url_for('admin.add_student') }}" class="btn btn-primary mb-3">Добавить студента</a>
       <div class="table-responsive">
         <table class="table table-bordered table-hover">
           <thead>
@@ -155,16 +174,21 @@
             </tr>
           </thead>
           <tbody>
+            {% for student in students %}
             <tr>
-              <td>Мария Петрова</td>
-              <td>maria@example.com</td>
-              <td>+375 29 1234567</td>
+              <td>{{ student.name }}</td>
+              <td>{{ student.email }}</td>
+              <td>{{ student.contact_info }}</td>
               <td>
-                <a href="#" class="btn btn-sm btn-outline-primary">Редактировать</a>
-                <a href="#" class="btn btn-sm btn-outline-danger">Удалить</a>
+                <a href="{{ url_for('admin.edit_student', student_id=student.id) }}" class="btn btn-sm btn-outline-primary">Редактировать</a>
+                <a href="{{ url_for('admin.delete_student', student_id=student.id) }}" class="btn btn-sm btn-outline-danger">Удалить</a>
               </td>
             </tr>
-            <!-- Дополнительные строки -->
+            {% else %}
+            <tr>
+              <td colspan="4" class="text-center">Нет студентов</td>
+            </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>
@@ -184,15 +208,20 @@
             </tr>
           </thead>
           <tbody>
+            {% for review in reviews %}
             <tr>
-              <td>Александр Смирнов</td>
-              <td>"Отличный курс, навыки очень полезны!"</td>
+              <td>{{ review.author.name if review.author else 'Неизвестно' }}</td>
+              <td>{{ review.content }}</td>
               <td>
-                <a href="#" class="btn btn-sm btn-success">Одобрить</a>
-                <a href="#" class="btn btn-sm btn-danger">Отклонить</a>
+                <a href="{{ url_for('admin.approve_review', review_id=review.id) }}" class="btn btn-sm btn-success">Одобрить</a>
+                <a href="{{ url_for('admin.reject_review', review_id=review.id) }}" class="btn btn-sm btn-danger">Отклонить</a>
               </td>
             </tr>
-            <!-- Дополнительные строки -->
+            {% else %}
+            <tr>
+              <td colspan="3" class="text-center">Нет отзывов для модерации</td>
+            </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>

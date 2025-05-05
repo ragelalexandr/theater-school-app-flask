@@ -13,8 +13,11 @@ from app import db
 from app.models import TheatreShow, Course, User, Review
 from app.admin import bp
 from app.decorators import roles_required
+from datetime import datetime
 
-# Обработка ошибок и уведомления внутри маршрутов
+
+
+
 @bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     if current_user.is_authenticated:
@@ -44,9 +47,21 @@ def admin_required(f):
 # ================== 6.1. Административная панель ==================
 @bp.route('/dashboard')
 @login_required
-@admin_required
+@roles_required('admin')
 def dashboard():
-    return render_template('admin/dashboard.html', title='Административная панель')
+    shows = TheatreShow.query.order_by(TheatreShow.show_date.desc()).all()
+    courses = Course.query.order_by(Course.start_datetime.desc()).all()
+    teachers = User.query.filter_by(role='teacher').order_by(User.name).all()
+    students = User.query.filter_by(role='student').order_by(User.name).all()
+    reviews = Review.query.filter_by(moderated=False).order_by(Review.created_at.desc()).all()
+    return render_template('admin/dashboard.html',
+                           title='Административная панель',
+                           shows=shows,
+                           courses=courses,
+                           teachers=teachers,
+                           students=students,
+                           reviews=reviews)
+
 
 # ================== 6.2. Управление базами данных ==================
 
@@ -58,20 +73,29 @@ def theatre_shows():
     shows = TheatreShow.query.order_by(TheatreShow.show_date.desc()).all()
     return render_template('admin/theatre_shows.html', shows=shows, title='Театральные представления')
 
+
+
 @bp.route('/theatre_shows/add', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def add_theatre_show():
     if request.method == 'POST':
         title = request.form.get('title')
-        show_date = request.form.get('show_date')  # Формат: "YYYY-MM-DD HH:MM:SS"
+        # Получаем строку, например "2025-07-06T18:00"
+        show_date_str = request.form.get('show_date')
+        # Преобразуем строку в объект datetime согласно формату, который возвращает flatpickr
+        show_date = datetime.strptime(show_date_str, "%Y-%m-%dT%H:%M")
         description = request.form.get('description')
+        
         new_show = TheatreShow(title=title, show_date=show_date, description=description)
         db.session.add(new_show)
         db.session.commit()
         flash('Театральное представление добавлено.', 'success')
-        return redirect(url_for('admin.theatre_shows'))
+        return redirect(url_for('admin.dashboard'))
     return render_template('admin/add_theatre_show.html', title='Добавить представление')
+
+
+from datetime import datetime
 
 @bp.route('/theatre_shows/edit/<int:show_id>', methods=['GET', 'POST'])
 @login_required
@@ -80,12 +104,19 @@ def edit_theatre_show(show_id):
     show = TheatreShow.query.get_or_404(show_id)
     if request.method == 'POST':
         show.title = request.form.get('title')
-        show.show_date = request.form.get('show_date')
+        
+        # Получаем строку даты и времени из формы, например "2025-08-12T18:00"
+        show_date_str = request.form.get('show_date')
+        if show_date_str:
+            # Преобразуем строку в объект datetime. Формат должен соответствовать значению, возвращаемому вашим input.
+            show.show_date = datetime.strptime(show_date_str, "%Y-%m-%dT%H:%M")
+        
         show.description = request.form.get('description')
         db.session.commit()
         flash('Данные представления обновлены.', 'success')
-        return redirect(url_for('admin.theatre_shows'))
+        return redirect(url_for('admin.dashboard'))
     return render_template('admin/edit_theatre_show.html', show=show, title='Редактировать представление')
+
 
 @bp.route('/theatre_shows/delete/<int:show_id>', methods=['POST'])
 @login_required
@@ -95,9 +126,8 @@ def delete_theatre_show(show_id):
     db.session.delete(show)
     db.session.commit()
     flash('Представление удалено.', 'info')
-    return redirect(url_for('admin.theatre_shows'))
-    
-# ---- Курсы (CRUD для Course) ----
+    return redirect(url_for('admin.dashboard'))
+
 @bp.route('/courses')
 @login_required
 @admin_required
@@ -120,3 +150,62 @@ def add_course():
         db.session.add(new_course)
         db.session.commit()
         flash
+
+@bp.route('/teachers/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_teacher():
+    if request.method == 'POST':
+        # Обработка формы: получение данных формы, валидация и запись в базу данных.
+        name = request.form.get('name')
+        contact_info = request.form.get('contact_info')
+        # Здесь добавьте логику создания нового преподавателя.
+        new_teacher = User(name=name, contact_info=contact_info, role='teacher')
+        db.session.add(new_teacher)
+        db.session.commit()
+        flash('Преподаватель успешно добавлен.', 'success')
+        return redirect(url_for('admin.teachers'))
+    return render_template('admin/add_teacher.html', title='Добавить преподавателя')
+
+@bp.route('/students/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_student():
+    if request.method == 'POST':
+        # Получите данные из формы
+        name = request.form.get('name')
+        email = request.form.get('email')
+        contact_info = request.form.get('contact_info')
+        # Создайте нового студента
+        new_student = User(name=name, email=email, contact_info=contact_info, role='student')
+        db.session.add(new_student)
+        db.session.commit()
+        flash('Студент успешно добавлен.', 'success')
+        return redirect(url_for('admin.dashboard'))
+    return render_template('admin/add_student.html', title='Добавить студента')
+
+@bp.route('/students/edit/<int:student_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_student(student_id):
+    student = User.query.get_or_404(student_id)
+    if request.method == 'POST':
+        # Получаем данные из формы и обновляем запись студента
+        student.name = request.form.get('name')
+        student.email = request.form.get('email')
+        student.contact_info = request.form.get('contact_info')
+        db.session.commit()
+        flash('Данные студента обновлены.', 'success')
+        return redirect(url_for('admin.dashboard'))
+    return render_template('admin/edit_student.html', student=student, title='Редактировать студента')
+
+@bp.route('/students/delete/<int:student_id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_student(student_id):
+    student = User.query.get_or_404(student_id)
+    db.session.delete(student)
+    db.session.commit()
+    flash('Студент успешно удалён.', 'info')
+    return redirect(url_for('admin.dashboard'))
+
